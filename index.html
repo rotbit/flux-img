@@ -1,6 +1,585 @@
-<html>
-  <title>这是一个测试页面</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI图像生成器</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --text-color: #e0e0e0;
+        --primary-color: #00bcd4;
+        --secondary-color: #7c4dff;
+      }
+
+      body {
+        font-family: "Noto Sans SC", sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        background-color: rgba(18, 18, 24, 0.95);
+        backdrop-filter: blur(20px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      nav.container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav h1 {
+        font-size: 28px;
+        margin: 0;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 15px rgba(0, 188, 212, 0.5);
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+
+      nav .center-links {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 20px;
+      }
+
+      nav .nav-links a {
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 10px 20px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.8);
+        position: relative;
+        overflow: hidden;
+      }
+
+      nav .nav-links a::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      nav .nav-links a:hover::before {
+        transform: scaleX(1);
+      }
+
+      nav .nav-links a:hover {
+        color: #ffffff;
+      }
+
+      nav .login-btn {
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        color: #fff;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+      }
+
+      nav .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 188, 212, 0.4);
+      }
+
+      @media (max-width: 768px) {
+        nav.container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        nav .center-links {
+          position: static;
+          transform: none;
+          margin: 20px 0;
+        }
+
+        nav .login-btn {
+          margin-top: 20px;
+        }
+      }
+
+      h2 {
+        color: var(--primary-color);
+        text-align: center;
+      }
+
+      .main-content {
+        display: flex;
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .input-area {
+        flex: 1;
+        background-color: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 50px;
+        transition: all 0.3s ease;
+      }
+
+      .input-area:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .input-area h2 {
+        color: #fff;
+        font-size: 32px;
+        margin-bottom: 25px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        display: inline-block;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .input-area h2::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        transform: scaleX(0.7);
+        transition: transform 0.3s ease;
+      }
+
+      .input-area:hover h2::after {
+        transform: scaleX(1);
+      }
+
+      .input-container {
+        position: relative;
+        margin-bottom: 25px;
+      }
+
+      textarea {
+        width: 100%;
+        height: 120px;
+        resize: vertical;
+        padding: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+      }
+
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 188, 212, 0.4);
+      }
+
+      @media (max-width: 768px) {
+        .input-area {
+          padding: 30px;
+        }
+        .input-area h2 {
+          font-size: 28px;
+        }
+      }
+
+      .generated-images {
+        flex: 1;
+        background-color: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .generated-images h2 {
+        color: #fff;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+      }
+
+      .image-item {
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .image-item:hover {
+        transform: scale(1.05);
+      }
+
+      .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          flex-direction: column;
+        }
+      }
+
+      footer {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        text-align: center;
+        padding: 20px 0;
+        margin-top: 40px;
+      }
+
+      .faq {
+        background-color: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-top: 50px;
+      }
+
+      .faq h2 {
+        color: #fff;
+        font-size: 28px;
+        margin-bottom: 25px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .faq-item {
+        margin-bottom: 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 15px;
+      }
+
+      .faq-question {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .faq-answer {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        nav {
+          flex-direction: column;
+        }
+        nav ul {
+          margin-top: 15px;
+        }
+      }
+
+      .recommended-works {
+        margin-top: 50px;
+        background-color: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .recommended-works h2 {
+        color: #fff;
+        font-size: 28px;
+        margin-bottom: 25px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        background: linear-gradient(45deg, #00bcd4, #6a3de8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .works-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+      }
+
+      .work-item {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .work-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .work-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+      }
+
+      .work-info {
+        padding: 15px;
+      }
+
+      .work-info h3 {
+        color: #fff;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .work-info p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .works-grid {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+      }
+    </style>
+  </head>
   <body>
-    <h1>这是一个测试页面</h1>
+    <header>
+      <nav class="container">
+        <h1>AI Image Generator</h1>
+        <div class="center-links nav-links">
+          <a href="index.html">Home</a>
+          <a href="price.html">Price</a>
+        </div>
+        <a href="#" class="login-btn">Login</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div class="main-content">
+        <section class="input-area">
+          <h2>Enter Prompt</h2>
+          <div class="input-container">
+            <textarea
+              placeholder="Describe the image you want to generate..."
+            ></textarea>
+          </div>
+          <button>Generate</button>
+        </section>
+
+        <section class="generated-images">
+          <h2>Generated Images</h2>
+          <div class="image-grid">
+            <div class="image-item">
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Generated image"
+              />
+            </div>
+            <div class="image-item">
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Generated image"
+              />
+            </div>
+            <div class="image-item">
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Generated image"
+              />
+            </div>
+            <div class="image-item">
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Generated image"
+              />
+            </div>
+            <!-- 可以根据需要添加更多图片项 -->
+          </div>
+        </section>
+      </div>
+
+      <section class="recommended-works">
+        <h2>Recommended Works</h2>
+        <div class="works-grid">
+          <div class="work-item">
+            <img
+              src="https://via.placeholder.com/250x200"
+              alt="Recommended work 1"
+            />
+            <div class="work-info">
+              <h3>Cosmic Dreams</h3>
+              <p>A journey through space and time</p>
+            </div>
+          </div>
+          <div class="work-item">
+            <img
+              src="https://via.placeholder.com/250x200"
+              alt="Recommended work 2"
+            />
+            <div class="work-info">
+              <h3>Neon City</h3>
+              <p>Futuristic urban landscapes</p>
+            </div>
+          </div>
+          <div class="work-item">
+            <img
+              src="https://via.placeholder.com/250x200"
+              alt="Recommended work 3"
+            />
+            <div class="work-info">
+              <h3>Nature's Whisper</h3>
+              <p>Serene natural environments</p>
+            </div>
+          </div>
+          <div class="work-item">
+            <img
+              src="https://via.placeholder.com/250x200"
+              alt="Recommended work 4"
+            />
+            <div class="work-info">
+              <h3>Abstract Emotions</h3>
+              <p>Expressing feelings through colors</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+          <div class="faq-question">How does the AI image generator work?</div>
+          <div class="faq-answer">
+            Our AI image generator uses advanced machine learning algorithms to
+            create unique images based on your text descriptions. It analyzes
+            your input and generates images that match the given prompts.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            Can I use the generated images for commercial purposes?
+          </div>
+          <div class="faq-answer">
+            Yes, all images generated by our AI are royalty-free and can be used
+            for both personal and commercial purposes. However, we recommend
+            checking our terms of service for any specific limitations.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            How long does it take to generate an image?
+          </div>
+          <div class="faq-answer">
+            The generation process typically takes between 10 to 30 seconds,
+            depending on the complexity of the prompt and current server load.
+            More detailed or complex prompts may take slightly longer.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            Can I edit or modify the generated images?
+          </div>
+          <div class="faq-answer">
+            While our system doesn't provide built-in editing tools, you can
+            download the generated images and edit them using your preferred
+            image editing software. We encourage creativity and customization!
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2023 AI图像生成器. 保留所有权利。</p>
+    </footer>
   </body>
 </html>
